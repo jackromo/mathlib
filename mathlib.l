@@ -6,9 +6,10 @@
 #include <stdlib.h>
 %}
 
-digit [0-9]
-integer {digit}+
-num {integer}("."{integer})?
+digit		[0-9]
+integer		{digit}+
+exponent	[eE][+-]?{integer}
+num		{integer}("."{integer})?{exponent}?
 
 %%
 
@@ -23,6 +24,7 @@ num {integer}("."{integer})?
 "("		{ return LPAREN; }
 ")"		{ return RPAREN; }
 "^"		{ return POWER; }
+"%"		{ return MOD; }
 "\n"		{ return END; }
 
 %%

@@ -8,9 +8,10 @@
 
 %token NUM
 
-%left MULT DIV
+%left MULT DIV MOD
 %left PLUS MIN
 
+%left NEG
 %right POWER
 
 %token LPAREN RPAREN
@@ -37,7 +38,9 @@ Expression:
 	| Expression MULT Expression { $$ = $1 * $3; }
 	| Expression MIN Expression { $$ = $1 - $3; }
 	| Expression DIV Expression { $$ = $1 / $3; }
+	| MIN Expression %prec NEG { $$ = -$2; }
 	| Expression POWER Expression { $$ = pow($1, $3); }
+	| Expression MOD Expression { $$ = (int)$1 % (int)$3; }
 	| LPAREN Expression RPAREN { $$ = $2; }
 ;
 
