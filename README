@@ -1,6 +1,6 @@
 This is a simple parser designed to parse simple mathematical calculations, 1 line long, of arbitary length.
 
 The parser can:
--Add, multiply, divide, subtract
--Understand parentheses
--Perform exponents
+-Add, multiply, divide, subtract and perform modulus
+-Recognize parentheses
+-Perform exponents (4e2 and 4^2)
