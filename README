@@ -1,1 +1,6 @@
-Hello World!
+This is a simple parser designed to parse simple mathematical calculations, 1 line long, of arbitary length.
+
+The parser can:
+-Add, multiply, divide, subtract
+-Understand parentheses
+-Perform exponents
