@@ -4,3 +4,5 @@ The parser can:
 -Add, multiply, divide, subtract and perform modulus
 -Recognize parentheses
 -Perform exponents (4e2 and 4^2)
+-Perform sin, cos and tan (measured in radians)
+-Remember last given answer in special variable 'ans'

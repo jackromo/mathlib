@@ -38,16 +38,20 @@
       know about them.  */
    enum yytokentype {
      NUM = 258,
-     MOD = 259,
-     DIV = 260,
-     MULT = 261,
-     MIN = 262,
-     PLUS = 263,
-     NEG = 264,
-     POWER = 265,
-     LPAREN = 266,
-     RPAREN = 267,
-     END = 268
+     ANS = 259,
+     TAN = 260,
+     COS = 261,
+     SIN = 262,
+     MOD = 263,
+     DIV = 264,
+     MULT = 265,
+     MIN = 266,
+     PLUS = 267,
+     NEG = 268,
+     POWER = 269,
+     LPAREN = 270,
+     RPAREN = 271,
+     END = 272
    };
 #endif
 

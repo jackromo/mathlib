@@ -25,6 +25,10 @@ num		{integer}("."{integer})?{exponent}?
 ")"		{ return RPAREN; }
 "^"		{ return POWER; }
 "%"		{ return MOD; }
+"sin"		{ return SIN; }
+"cos"		{ return COS; }
+"tan"		{ return TAN; }
+"ans"		{ return ANS; }
 "\n"		{ return END; }
 
 %%
