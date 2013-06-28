@@ -1,20 +1,19 @@
 %{
-#define YYSTYPE double
-
 #include "mathlib.tab.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "symtable.h"
 %}
 
 digit		[0-9]
 integer		{digit}+
 exponent	[eE][+-]?{integer}
 num		{integer}("."{integer})?{exponent}?
-
+string		[a-z]+
 %%
 
 [ \t]		;
-{num}	{ yylval = atof(yytext);
+{num}	{ yylval.val = atof(yytext);
 	return NUM;
 	}
 "+"		{ return PLUS; }
@@ -25,10 +24,16 @@ num		{integer}("."{integer})?{exponent}?
 ")"		{ return RPAREN; }
 "^"		{ return POWER; }
 "%"		{ return MOD; }
-"sin"		{ return SIN; }
-"cos"		{ return COS; }
-"tan"		{ return TAN; }
+"="		{ return ASSIGN; }
 "ans"		{ return ANS; }
+{string}	{ symobj *s = getsym(yytext);
+		  if(s == 0)
+		  	s = putsym(yytext, VAR);
+		  yylval.tptr = s;
+		  if(s->type == FNCT)
+			return FUNC;
+		  return VAR; }
+
 "\n"		{ return END; }
 
 %%

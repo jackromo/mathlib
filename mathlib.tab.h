@@ -39,9 +39,9 @@
    enum yytokentype {
      NUM = 258,
      ANS = 259,
-     TAN = 260,
-     COS = 261,
-     SIN = 262,
+     VAR = 260,
+     FUNC = 261,
+     ASSIGN = 262,
      MOD = 263,
      DIV = 264,
      MULT = 265,
@@ -58,7 +58,20 @@
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+{
+
+/* Line 2068 of yacc.c  */
+#line 10 "mathlib.y"
+
+	double val;            // For returning numbers
+	struct symobj *tptr;   // For returning symbol-table pointers
+
+
+
+/* Line 2068 of yacc.c  */
+#line 74 "mathlib.tab.h"
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
