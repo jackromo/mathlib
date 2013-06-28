@@ -63,24 +63,39 @@ Expression:
 
 %%
 
-struct init  // Prewritten function type to be put into symbol table at beginning (sin, cos, etc.)
+struct f_init  // Prewritten function type to be put into symbol table at beginning (sin, cos, etc.)
 {
-  char *fname;
-  double (*fnct)();
+	char *fname;
+	double (*fnct)();
 };
 
-struct init fnc_list[]  // List of functions to initially put into symbol table
-  = {
-      "sin", sin,
-      "cos", cos,
-      "atan", atan,
-      "ln", log,
-      "exp", exp,
-      "sqrt", sqrt,
-      0, 0
-    };
+struct v_init  // Prewritten variables to be put into symbol table at beginning (pi, e, etc.)
+{
+	char *vname;
+	double num;
+};
 
-int init_list()  // Initializes symbol table with fnc_list
+struct f_init fnc_list[]  // List of functions to initially put into symbol table
+	= {
+		"sin", sin,
+		"cos", cos,
+		"tan", tan,
+		"atan", atan,
+		"sinh", sinh,
+		"ln", log,
+		"exp", exp,
+		"sqrt", sqrt,
+		0, 0
+	};
+
+struct v_init var_list[]  // List of variables to initially put into symbol table
+	= {
+		"pi", 3.14593654,
+		"e", 2.718281828,
+		0, 0
+	};
+
+int init_list()  // Initializes symbol table with fnc_list and var_list
 {
 
 	int i;
@@ -89,6 +104,11 @@ int init_list()  // Initializes symbol table with fnc_list
 	{
 		ptr = putsym (fnc_list[i].fname, FNCT);
 		ptr->value.fnptr = fnc_list[i].fnct;
+	}
+	for (i = 0; var_list[i].vname != 0; i++)
+	{
+		ptr = putsym (var_list[i].vname, VARI);
+		ptr->value.var = var_list[i].num;
 	}
 	return 0;
 

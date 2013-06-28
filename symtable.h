@@ -19,5 +19,5 @@ typedef struct symobj symobj;
 
 extern symobj *symtab;
 
-symobj *putsym(char *sym_name, int sym_type);  // Returns a pointer to a specified symbol
-symobj *getsym(char *sym_name);  // Puts a symbol in table
+symobj *putsym(char *sym_name, int sym_type);  // Puts a symbol in table
+symobj *getsym(char *sym_name);  // Returns a pointer to a specified symbol 
