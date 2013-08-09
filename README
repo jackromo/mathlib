@@ -12,17 +12,18 @@ The parser can:
 
 -Store user-defined and predefined (pi, e) variables
 
--Accept and perform user-defined functions (can be put inside one another and used as operands) (only 1 argument)
+-Accept and perform user-defined functions (can be put inside one another and used as operands) (arbitrary number of arguments)
 	-eg. f(x): x-1
 	-f(9)
 	-This will give the result '8'.
-	-g(n): f(n) + f(n-1)
-	-g(8)
+	-g(a, b): f(a) + f(b)
+	-g(8, 7)
 	-This will give the result '11'.
+	-Note: The number of arguments given when calling the function must be the same as the amount of arguments in the function definition.
 
 -Remember last given answer in special variable 'ans'
 
--Understand '>', '<', '>=', '<=', and '=='
+-Understand '>', '<', '>=', '<=', '==', '!=', '&&', and '||' (no precedence; '0==0 || 4==0' won't work, must be '(0==0) || (4==0)')
 
 -Perform if-then-else statements
 	-eg. if 8>2 then {5} else {0}

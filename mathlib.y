@@ -6,18 +6,21 @@
 #include <ctype.h>
 #include "symtable.h"
 
-extern symobj *make_fnc(symobj *s, char *arg, char ending, int unput_end_char);		// Used to create a user-defined function.	
-extern double parse_fnc(struct symobj *, double param);					// Used to parse a function's string.
+extern symobj *make_fnc(symobj *s, char ending, int unput_end_char, int arg_count, char *args[]);// Used to create a user-defined function.	
+extern double parse_fnc(symobj *sym, int param_count, double args[]);				// Used to parse a function's string.
 
 extern double if_stmt(double param);		// Carries out an if-statement (was too big to not put in a function)
 
 int parsing_lvl = 0;		// Level of parsing (0 if main input, 1 if a function, 2 if a function in a function, etc.)
 double ans;			// Answer to previous operation is remembered in this variable. Represented by ANS token.
+int arg_count = 0;		// Number of arguments in most recently defined or used function.
 %}
 
 %union {
-	double val;            // For returning numbers
-	struct symobj *tptr;   // For returning symbol-table pointers
+	double val;		// For returning numbers
+	struct symobj *tptr;	// For returning symbol-table pointers
+	double val_array[8];	// For returning arrays of numbers
+	char *str_array[8];	// For returning arrays of strings
 }
 
 %token <val> NUM ANS
@@ -25,6 +28,8 @@ double ans;			// Answer to previous operation is remembered in this variable. Re
 %token <tptr> VAR FUNC  // Variables and functions
 
 %type <val> Expression Assignment Operation If_stmt Conditionnal
+%type <val_array> Func_args 
+%type <str_array> Func_assign
 
 %right ASSIGN F_ASSIGN
 
@@ -38,8 +43,10 @@ double ans;			// Answer to previous operation is remembered in this variable. Re
 
 %token END
 
+%left COMMA
+
 %right IF THEN ELSE
-%left GT LT GE LE ET // Greater than (>), less than (<), greater than or equal to (>=), less than or equal to (<=), equal to (==)
+%left GT LT GE LE ET NE AND OR // >, <, >=, <=, ==, !=, &&, ||
 
 %start Input
 
@@ -67,15 +74,15 @@ Expression:
 	| Conditionnal { $$ = $1; }
 	| MIN Expression %prec NEG { $$ = -$2; }
 	| LPAREN Expression RPAREN { $$ = $2; }
-	| FUNC LPAREN Expression RPAREN { if($1->type == FNCT)		$$ = (*($1->value.fnptr))($3);
-					else if($1->type == USER_FNCT)	$$ = parse_fnc($1, $3);  /*Parse the string 'fnval' in function.*/ }
+	| FUNC LPAREN Func_args RPAREN { if($1->type == FNCT)		$$ = (*($1->value.fnptr))($3[0]);
+					else if($1->type == USER_FNCT)	$$ = parse_fnc($1, arg_count, $3);  /*Parse the string 'fnval'.*/ }
 ;
 
 Assignment:
 	VAR ASSIGN Expression { $$ = $3;
 				$1->value.var = $3; }
-	| VAR LPAREN VAR RPAREN F_ASSIGN { $$ = 0;
-					   $1 = make_fnc($1, $3->name, '\n', 1); }
+	| VAR LPAREN Func_assign RPAREN F_ASSIGN { $$ = 0;
+					   $1 = make_fnc($1, '\n', 1, arg_count, $3); }
 ;
 
 Operation:
@@ -97,8 +104,20 @@ Conditionnal:
 	| Expression GE Expression { $$ = ($1 >= $3 ? 1:0); }
 	| Expression LE Expression { $$ = ($1 <= $3 ? 1:0); }
 	| Expression ET Expression { $$ = ($1 == $3 ? 1:0); }
+	| Expression NE Expression { $$ = ($1 != $3 ? 1:0); }
+	| Expression AND Expression { $$ = ($1 && $3 ? 1:0); }
+	| Expression OR Expression { $$ = ($1 || $3 ? 1:0); }
 ;
 
+Func_assign:
+	VAR { arg_count = 0; $$[0] = $1->name; arg_count++; }
+	| Func_assign COMMA VAR { $$[arg_count] = $3->name; arg_count++; }
+;
+
+Func_args:
+	Expression { arg_count = 0; $$[0] = $1; arg_count++; }
+	| Func_args COMMA Expression { $$[arg_count] = $3; arg_count++; }
+;
 
 %%
 
@@ -164,7 +183,7 @@ symobj *symtab = (symobj *)0;
 int main()
 {
 	init_list();
-	
+
 	if (!yyparse())
 		fprintf(stderr, "Successful parsing.\n");
 	else

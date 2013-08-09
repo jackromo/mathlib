@@ -2,6 +2,7 @@
 #define FNCT 1
 #define USER_FNCT 2
 #define VARI 0
+#define MAX_ARGS 8 // Max amount of args in a function.
 
 // Define all functions and types for symbol table.
 
@@ -15,7 +16,7 @@ struct symobj // Type for symbol in table
 		char *fnval;		// For user-defined functions. Contains a string of the function, which then is evaluated by parser.
 	} value;
 
-	char *arg;		// name of argument for user-defined functions
+	char *arg[MAX_ARGS];		// name of argument for user-defined functions
 
 	struct symobj *next;	// pointer to next symbol in list
 };

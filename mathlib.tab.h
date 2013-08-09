@@ -57,14 +57,18 @@
      C_LPAREN = 273,
      C_RPAREN = 274,
      END = 275,
-     ELSE = 276,
-     THEN = 277,
-     IF = 278,
-     ET = 279,
-     LE = 280,
-     GE = 281,
-     LT = 282,
-     GT = 283
+     COMMA = 276,
+     ELSE = 277,
+     THEN = 278,
+     IF = 279,
+     OR = 280,
+     AND = 281,
+     NE = 282,
+     ET = 283,
+     LE = 284,
+     GE = 285,
+     LT = 286,
+     GT = 287
    };
 #endif
 
@@ -75,15 +79,17 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 18 "mathlib.y"
+#line 19 "mathlib.y"
 
-	double val;            // For returning numbers
-	struct symobj *tptr;   // For returning symbol-table pointers
+	double val;		// For returning numbers
+	struct symobj *tptr;	// For returning symbol-table pointers
+	double val_array[8];	// For returning arrays of numbers
+	char *str_array[8];	// For returning arrays of strings
 
 
 
 /* Line 1676 of yacc.c  */
-#line 87 "mathlib.tab.h"
+#line 93 "mathlib.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
