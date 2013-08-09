@@ -12,7 +12,7 @@ The parser can:
 
 -Store user-defined and predefined (pi, e) variables
 
--Accept and perform user-defined functions (can be put inside one another and used as operands)
+-Accept and perform user-defined functions (can be put inside one another and used as operands) (only 1 argument)
 	-eg. f(x): x-1
 	-f(9)
 	-This will give the result '8'.
@@ -21,3 +21,12 @@ The parser can:
 	-This will give the result '11'.
 
 -Remember last given answer in special variable 'ans'
+
+-Understand '>', '<', '>=', '<=', and '=='
+
+-Perform if-then-else statements
+	-eg. if 8>2 then {5} else {0}
+	-This will give the result '5'.
+	-eg. factorial(x):if x==1 then {1} else {x*factorial(x-1)}
+	-This function will, inherently, perform factorials.
+	-The 'else' statement is optional, yet the brackets are obligatory.

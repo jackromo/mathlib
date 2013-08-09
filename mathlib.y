@@ -3,10 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "symtable.h"
 
-extern symobj *make_fnc(symobj *s, char *arg);		// Used to create a user-defined function.	
-extern double parse_fnc(struct symobj *, double);	// Used to parse a function's string.
+extern symobj *make_fnc(symobj *s, char *arg, char ending, int unput_end_char);		// Used to create a user-defined function.	
+extern double parse_fnc(struct symobj *, double param);					// Used to parse a function's string.
+
+extern double if_stmt(double param);		// Carries out an if-statement (was too big to not put in a function)
 
 int parsing_lvl = 0;		// Level of parsing (0 if main input, 1 if a function, 2 if a function in a function, etc.)
 double ans;			// Answer to previous operation is remembered in this variable. Represented by ANS token.
@@ -31,12 +34,12 @@ double ans;			// Answer to previous operation is remembered in this variable. Re
 %left NEG
 %right POWER
 
-%token LPAREN RPAREN
+%token LPAREN RPAREN C_LPAREN C_RPAREN //normal brackets () and curly brackets {} 
 
 %token END
 
 %right IF THEN ELSE
-%left GT LT GE LE ET
+%left GT LT GE LE ET // Greater than (>), less than (<), greater than or equal to (>=), less than or equal to (<=), equal to (==)
 
 %start Input
 
@@ -72,7 +75,7 @@ Assignment:
 	VAR ASSIGN Expression { $$ = $3;
 				$1->value.var = $3; }
 	| VAR LPAREN VAR RPAREN F_ASSIGN { $$ = 0;
-					   $1 = make_fnc($1, $3->name); }
+					   $1 = make_fnc($1, $3->name, '\n', 1); }
 ;
 
 Operation:
@@ -85,8 +88,7 @@ Operation:
 ;
 
 If_stmt:
-	IF Expression THEN Expression ELSE Expression { if($2)	$$ = $4;
-							else	$$ = $6; }
+	IF Expression THEN C_LPAREN { $$ = if_stmt($2); }
 ;
 
 Conditionnal:
@@ -96,6 +98,7 @@ Conditionnal:
 	| Expression LE Expression { $$ = ($1 <= $3 ? 1:0); }
 	| Expression ET Expression { $$ = ($1 == $3 ? 1:0); }
 ;
+
 
 %%
 
@@ -136,6 +139,7 @@ int init_list()  // Initializes symbol table with fnc_list and var_list
 
 	int i;
 	symobj *ptr;
+
 	for (i = 0; fnc_list[i].fname != 0; i++)
 	{
 		ptr = putsym (fnc_list[i].fname, FNCT);

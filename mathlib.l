@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "symtable.h"
-#define STR_LEN 20		// Length of function string, not including \0 ending.
+#define STR_LEN 200		// Length of function string, not including \0 ending.
 
-symobj *last_func;	// Pointer to a recently made or used user-defined function, used in former case to transfer pointer to 'mathlib.l'.
-double last_arg = 0;	// Value of a user_defined function's argument, used to send this value to argument function.
+symobj *last_func;		// Stack of pointers to recently made or used user-defined functions.
+double last_arg = 0;	// Stack of values of user_defined functions' argument, used to send this value to argument function.
 
 extern double ans;
 extern int yyparse();
@@ -27,6 +27,8 @@ string		[a-z]+
 "-"		{ return MIN; }
 "*"		{ return MULT; }
 "/"		{ return DIV; }
+"{"		{ return C_LPAREN; }
+"}"		{ return C_RPAREN; }
 "("		{ return LPAREN; }
 ")"		{ return RPAREN; }
 "^"		{ return POWER; }
@@ -53,13 +55,23 @@ string		[a-z]+
 			 return NUM;
 		  }
 		  return VAR; }
-"\n"		{ return END; }
+"\n"		{  return END; }
 
 %%
 
-symobj *make_fnc(symobj *s, char *arg)
+int skip_until(char ending, int unput_char)
 {
-		char p, *t; 
+	char c;
+	while((c = input()) != ending)
+		;
+	if(unput_char == 1)
+		unput(c);
+	return 0;
+}
+
+symobj *make_fnc(symobj *s, char *arg, char ending, int unput_end_char)
+{
+		char p, *t;
 
 		s->type = USER_FNCT;
 
@@ -70,40 +82,43 @@ symobj *make_fnc(symobj *s, char *arg)
 		strcpy(s->arg, arg);
 
 		s->value.fnval = malloc(STR_LEN + 2);
+		if(s->value.fnval == NULL)
+			exit(EXIT_FAILURE);
+
 		t = s->value.fnval;
 
-		while((p = input()) != '\n')
+		while((p = input()) != ending)
 			*t++ = p;
 
 		*t++ = '\n';
 		*t = '\0';
-
-		unput(p);
+		if(unput_end_char == 1)
+			unput(p);
 		return s;
 }
 
-double parse_fnc (symobj *sym, double param, double arg)
+double parse_fnc (symobj *sym, double param)
 {
 	double prev_ans = ans;
 	double result;
 	char c;
 
-	last_arg = param;
 	last_func = sym;
+	last_arg = param;
 	
 	char *str = malloc(strlen(sym->value.fnval) + 2);
 	if(str == NULL)
 		exit(EXIT_FAILURE);
 	
 	strcpy(str, sym->value.fnval);
-
 	yypush_buffer_state(yy_create_buffer(yyin, YY_BUF_SIZE));
 
 	YY_BUFFER_STATE my_string_buffer = yy_scan_string(str);
- 
+
 	yy_switch_to_buffer(my_string_buffer);
 
 	parsing_lvl += 1;
+
 	yyparse();
 
 	parsing_lvl -= 1;
@@ -113,5 +128,59 @@ double parse_fnc (symobj *sym, double param, double arg)
 	yypop_buffer_state();
 	return result;
 }
+
+double parse_expr(char ending, int unput_ending)
+{
+	symobj *temp;
+	double result;
+
+	if((temp = getsym("temp")) == 0)
+		temp = putsym("temp", USER_FNCT);
+
+	if(parsing_lvl == 0) {
+		if(ending == '\n' || unput_ending == 1)
+			temp = make_fnc(temp, "0", ending, 1);
+		else
+			temp = make_fnc(temp, "0", ending, 0);
+		result = parse_fnc(temp, 0);
+	}
+	else {
+		if(ending == '\n' || unput_ending == 1)
+			temp = make_fnc(temp, last_func->arg, ending, 1);
+		else
+			temp = make_fnc(temp, last_func->arg, ending, 0);
+		result = parse_fnc(temp, last_arg);
+
+	}
+
+
+	return result;
+}
+
+double if_stmt(double param)
+{
+	double result = 0;
+	if(param)
+	{
+		result = parse_expr('}', 0);
+		if(yylex() == ELSE)
+			skip_until('}', 0);
+		else
+			yyless(0);
+	}
+	else
+	{
+		skip_until('}', 0);
+		if(yylex() == ELSE)
+		{
+			if(yylex() == C_LPAREN)
+				result = parse_expr('}', 0);
+		}
+		else
+			yyless(0);
+	}
+	return result;
+}
+
 
 yywrap() { return 1; }
