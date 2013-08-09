@@ -1,8 +1,10 @@
-/* A Bison parser, made by GNU Bison 2.5.  */
 
-/* Bison interface for Yacc-like parsers in C
+/* A Bison parser, made by GNU Bison 2.4.1.  */
+
+/* Skeleton interface for Bison's Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -41,17 +43,18 @@
      ANS = 259,
      VAR = 260,
      FUNC = 261,
-     ASSIGN = 262,
-     MOD = 263,
-     DIV = 264,
-     MULT = 265,
-     MIN = 266,
-     PLUS = 267,
-     NEG = 268,
-     POWER = 269,
-     LPAREN = 270,
-     RPAREN = 271,
-     END = 272
+     F_ASSIGN = 262,
+     ASSIGN = 263,
+     MOD = 264,
+     DIV = 265,
+     MULT = 266,
+     MIN = 267,
+     PLUS = 268,
+     NEG = 269,
+     POWER = 270,
+     LPAREN = 271,
+     RPAREN = 272,
+     END = 273
    };
 #endif
 
@@ -61,16 +64,16 @@
 typedef union YYSTYPE
 {
 
-/* Line 2068 of yacc.c  */
-#line 10 "mathlib.y"
+/* Line 1676 of yacc.c  */
+#line 15 "mathlib.y"
 
 	double val;            // For returning numbers
 	struct symobj *tptr;   // For returning symbol-table pointers
 
 
 
-/* Line 2068 of yacc.c  */
-#line 74 "mathlib.tab.h"
+/* Line 1676 of yacc.c  */
+#line 77 "mathlib.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

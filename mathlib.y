@@ -2,9 +2,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "symtable.h"
 
-double ans;  //Answer to previous operation is remembered in this variable. Represented by ANS token.
+extern symobj *make_fnc(symobj *s, char *arg);		// Used to create a user-defined function.	
+extern double parse_fnc(struct symobj *, double);	// Used to parse a function's string.
+
+int parsing_lvl = 0;		// Level of parsing (0 if main input, 1 if a function, 2 if a function in a function, etc.)
+double ans;			// Answer to previous operation is remembered in this variable. Represented by ANS token.
 %}
 
 %union {
@@ -18,7 +23,7 @@ double ans;  //Answer to previous operation is remembered in this variable. Repr
 
 %type <val> Expression
 
-%right ASSIGN
+%right ASSIGN F_ASSIGN
 
 %left MULT DIV MOD
 %left PLUS MIN
@@ -42,14 +47,16 @@ Input:
 Line:
 	END
 	| Expression END { ans = $1;
-			printf("result: %f\n", $1); }
+			if(parsing_lvl == 0)
+				printf("result: %lf\n", $1); }
 ;
 
 Expression:
 	NUM { $$ = $1; }
 	| ANS { $$ = ans; }
 	| VAR { $$ = $1->value.var; }
-	| VAR ASSIGN Expression { $$ = $3; $1->value.var = $3; }
+	| VAR ASSIGN Expression { $$ = $3;
+				$1->value.var = $3; }
 	| Expression PLUS Expression { $$ = $1 + $3; }
 	| Expression MULT Expression { $$ = $1 * $3; }
 	| Expression MIN Expression { $$ = $1 - $3; }
@@ -58,7 +65,12 @@ Expression:
 	| Expression POWER Expression { $$ = pow($1, $3); }
 	| Expression MOD Expression { $$ = (int)$1 % (int)$3; }
 	| LPAREN Expression RPAREN { $$ = $2; }
-	| FUNC LPAREN Expression RPAREN { $$ = (*($1->value.fnptr))($3); }
+	| FUNC LPAREN Expression RPAREN { if($1->type == FNCT)
+						 $$ = (*($1->value.fnptr))($3);
+					else if($1->type == USER_FNCT)
+						$$ = parse_fnc($1, $3);  /*Parse the string 'fnval' in function.*/ }
+	| VAR LPAREN VAR RPAREN F_ASSIGN { $$ = 0;
+					$1 = make_fnc($1, $3->name); }
 ;
 
 %%
@@ -116,7 +128,7 @@ int init_list()  // Initializes symbol table with fnc_list and var_list
 
 int yyerror(char *s)
 {
-	printf("%s\n", s);
+	printf("Error found: %s\n", s);
 }
 
 symobj *symtab = (symobj *)0;
@@ -124,7 +136,7 @@ symobj *symtab = (symobj *)0;
 int main()
 {
 	init_list();
-
+	
 	if (yyparse())
 		fprintf(stderr, "Successful parsing.\n");
 	else

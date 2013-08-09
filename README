@@ -1,9 +1,23 @@
 This is a simple parser designed to parse simple mathematical calculations, 1 line long, of arbitary length.
 
 The parser can:
--Add, multiply, divide, subtract and perform modulus
+
+-Add, multiply, divide, subtract and perform modulus (no precendence)
+
 -Recognize parentheses
+
 -Perform exponents (4e2 and 4^2)
--Perform sin, cos and tan (measured in radians)
+
+-Perform predefined functions (sin, cos, tan, atan, sinh, exp, ln, sqrt)
+
+-Store user-defined and predefined (pi, e) variables
+
+-Accept and perform user-defined functions (can be put inside one another and used as operands)
+	-eg. f(x): x-1
+	-f(9)
+	-This will give the result '8'.
+	-g(n): f(n) + f(n-1)
+	-g(8)
+	-This will give the result '11'.
+
 -Remember last given answer in special variable 'ans'
--Store variables and predefined functions in a symbol table
