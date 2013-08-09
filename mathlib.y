@@ -21,7 +21,7 @@ double ans;			// Answer to previous operation is remembered in this variable. Re
 
 %token <tptr> VAR FUNC  // Variables and functions
 
-%type <val> Expression
+%type <val> Expression Assignment Operation If_stmt Conditionnal
 
 %right ASSIGN F_ASSIGN
 
@@ -35,6 +35,9 @@ double ans;			// Answer to previous operation is remembered in this variable. Re
 
 %token END
 
+%right IF THEN ELSE
+%left GT LT GE LE ET
+
 %start Input
 
 %%
@@ -47,7 +50,7 @@ Input:
 Line:
 	END
 	| Expression END { ans = $1;
-			if(parsing_lvl == 0)
+			 if(parsing_lvl == 0)
 				printf("result: %lf\n", $1); }
 ;
 
@@ -55,22 +58,43 @@ Expression:
 	NUM { $$ = $1; }
 	| ANS { $$ = ans; }
 	| VAR { $$ = $1->value.var; }
-	| VAR ASSIGN Expression { $$ = $3;
+	| Assignment { $$ = $1; }
+	| Operation { $$ = $1; }
+	| If_stmt { $$ = $1; }
+	| Conditionnal { $$ = $1; }
+	| MIN Expression %prec NEG { $$ = -$2; }
+	| LPAREN Expression RPAREN { $$ = $2; }
+	| FUNC LPAREN Expression RPAREN { if($1->type == FNCT)		$$ = (*($1->value.fnptr))($3);
+					else if($1->type == USER_FNCT)	$$ = parse_fnc($1, $3);  /*Parse the string 'fnval' in function.*/ }
+;
+
+Assignment:
+	VAR ASSIGN Expression { $$ = $3;
 				$1->value.var = $3; }
-	| Expression PLUS Expression { $$ = $1 + $3; }
+	| VAR LPAREN VAR RPAREN F_ASSIGN { $$ = 0;
+					   $1 = make_fnc($1, $3->name); }
+;
+
+Operation:
+	Expression PLUS Expression { $$ = $1 + $3; }
 	| Expression MULT Expression { $$ = $1 * $3; }
 	| Expression MIN Expression { $$ = $1 - $3; }
 	| Expression DIV Expression { $$ = $1 / $3; }
-	| MIN Expression %prec NEG { $$ = -$2; }
 	| Expression POWER Expression { $$ = pow($1, $3); }
 	| Expression MOD Expression { $$ = (int)$1 % (int)$3; }
-	| LPAREN Expression RPAREN { $$ = $2; }
-	| FUNC LPAREN Expression RPAREN { if($1->type == FNCT)
-						 $$ = (*($1->value.fnptr))($3);
-					else if($1->type == USER_FNCT)
-						$$ = parse_fnc($1, $3);  /*Parse the string 'fnval' in function.*/ }
-	| VAR LPAREN VAR RPAREN F_ASSIGN { $$ = 0;
-					$1 = make_fnc($1, $3->name); }
+;
+
+If_stmt:
+	IF Expression THEN Expression ELSE Expression { if($2)	$$ = $4;
+							else	$$ = $6; }
+;
+
+Conditionnal:
+	Expression GT Expression { $$ = ($1 > $3 ? 1:0); }
+	| Expression LT Expression { $$ = ($1 < $3 ? 1:0); }
+	| Expression GE Expression { $$ = ($1 >= $3 ? 1:0); }
+	| Expression LE Expression { $$ = ($1 <= $3 ? 1:0); }
+	| Expression ET Expression { $$ = ($1 == $3 ? 1:0); }
 ;
 
 %%
@@ -137,8 +161,8 @@ int main()
 {
 	init_list();
 	
-	if (yyparse())
+	if (!yyparse())
 		fprintf(stderr, "Successful parsing.\n");
 	else
-		fprintf(stderr, "error found.\n");
+		fprintf(stderr, "Aborted parsing due to error.\n");
 }

@@ -22,8 +22,7 @@ string		[a-z]+
 
 [ \t]		;
 {num}		{ yylval.val = atof(yytext);
-		  return NUM;
-		}
+		  return NUM; }
 "+"		{ return PLUS; }
 "-"		{ return MIN; }
 "*"		{ return MULT; }
@@ -34,6 +33,14 @@ string		[a-z]+
 "%"		{ return MOD; }
 ":"		{ return F_ASSIGN; }
 "="		{ return ASSIGN; }
+"<"		{ return LT; }
+">"		{ return GT; }
+"<="		{ return LE; }
+">="		{ return GE; }
+"=="		{ return ET; }
+"if"		{ return IF; }
+"then"		{ return THEN; }
+"else"		{ return ELSE; }
 "ans"		{ return ANS; }
 {string}	{ symobj *s = getsym(yytext);
 		  if(s == 0)
